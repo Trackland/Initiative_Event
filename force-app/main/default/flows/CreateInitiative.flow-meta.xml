@@ -1,5 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionCalls>
+        <name>Start_automated_process</name>
+        <label>Start automated process</label>
+        <locationX>176</locationX>
+        <locationY>1106</locationY>
+        <actionName>TL_BC_ScheduledProcess</actionName>
+        <actionType>apex</actionType>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <inputParameters>
+            <name>inits</name>
+            <value>
+                <elementReference>init</elementReference>
+            </value>
+        </inputParameters>
+    </actionCalls>
     <apiVersion>58.0</apiVersion>
     <assignments>
         <name>return_Set</name>
@@ -20,6 +35,9 @@
                 <elementReference>InitiativeGet</elementReference>
             </value>
         </assignmentItems>
+        <connector>
+            <targetReference>init</targetReference>
+        </connector>
     </assignments>
     <assignments>
         <name>SetCampaignIds</name>
@@ -116,6 +134,12 @@
             <targetReference>SetCampaignIds</targetReference>
         </connector>
         <inputAssignments>
+            <field>Account__c</field>
+            <value>
+                <elementReference>Account</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
             <field>ActiveParticipants__c</field>
             <value>
                 <elementReference>CreateActivecampaign</elementReference>
@@ -181,6 +205,27 @@
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
     <recordLookups>
+        <name>init</name>
+        <label>init</label>
+        <locationX>176</locationX>
+        <locationY>998</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Start_automated_process</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>CreateInitiative</elementReference>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>Initiative__c</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <recordLookups>
         <name>InitiativeGet</name>
         <label>InitiativeGet</label>
         <locationX>176</locationX>
@@ -208,7 +253,14 @@
             <targetReference>CreateActivecampaign</targetReference>
         </connector>
     </start>
-    <status>Draft</status>
+    <status>Active</status>
+    <variables>
+        <name>Account</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
     <variables>
         <name>campaignIds</name>
         <dataType>String</dataType>
