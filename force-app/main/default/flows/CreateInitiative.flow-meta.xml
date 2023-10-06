@@ -4,7 +4,7 @@
         <name>Start_automated_process</name>
         <label>Start automated process</label>
         <locationX>176</locationX>
-        <locationY>1106</locationY>
+        <locationY>1430</locationY>
         <actionName>TL_BC_ScheduledProcess</actionName>
         <actionType>apex</actionType>
         <flowTransactionModel>CurrentTransaction</flowTransactionModel>
@@ -20,7 +20,7 @@
         <name>return_Set</name>
         <label>return Set</label>
         <locationX>176</locationX>
-        <locationY>890</locationY>
+        <locationY>1214</locationY>
         <assignmentItems>
             <assignToReference>CampaignstoReturn</assignToReference>
             <operator>Assign</operator>
@@ -43,7 +43,7 @@
         <name>SetCampaignIds</name>
         <label>Set Campaign Ids</label>
         <locationX>176</locationX>
-        <locationY>566</locationY>
+        <locationY>890</locationY>
         <assignmentItems>
             <assignToReference>campaignIds</assignToReference>
             <operator>Add</operator>
@@ -102,7 +102,7 @@
         <inputAssignments>
             <field>Name</field>
             <value>
-                <stringValue>Active {!Name}</stringValue>
+                <stringValue>Active - {!Name}</stringValue>
             </value>
         </inputAssignments>
         <object>Campaign</object>
@@ -119,7 +119,7 @@
         <inputAssignments>
             <field>Name</field>
             <value>
-                <stringValue>Inactive {!Name}</stringValue>
+                <stringValue>Inactive - {!Name}</stringValue>
             </value>
         </inputAssignments>
         <object>Campaign</object>
@@ -131,7 +131,7 @@
         <locationX>176</locationX>
         <locationY>458</locationY>
         <connector>
-            <targetReference>SetCampaignIds</targetReference>
+            <targetReference>AddInitiativeToActivecampaign</targetReference>
         </connector>
         <inputAssignments>
             <field>Account__c</field>
@@ -177,7 +177,7 @@
         <inputAssignments>
             <field>Name</field>
             <value>
-                <stringValue>To Screen {!Name}</stringValue>
+                <stringValue>To Screen - {!Name}</stringValue>
             </value>
         </inputAssignments>
         <object>Campaign</object>
@@ -187,7 +187,7 @@
         <name>CampaignsGet</name>
         <label>CampaignsGet</label>
         <locationX>176</locationX>
-        <locationY>674</locationY>
+        <locationY>998</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
             <targetReference>InitiativeGet</targetReference>
@@ -208,7 +208,7 @@
         <name>init</name>
         <label>init</label>
         <locationX>176</locationX>
-        <locationY>998</locationY>
+        <locationY>1322</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
             <targetReference>Start_automated_process</targetReference>
@@ -229,7 +229,7 @@
         <name>InitiativeGet</name>
         <label>InitiativeGet</label>
         <locationX>176</locationX>
-        <locationY>782</locationY>
+        <locationY>1106</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
             <targetReference>return_Set</targetReference>
@@ -246,6 +246,78 @@
         <object>Initiative__c</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
+    <recordUpdates>
+        <name>AddInitiativeToActivecampaign</name>
+        <label>AddInitiativeToActivecampaign</label>
+        <locationX>176</locationX>
+        <locationY>566</locationY>
+        <connector>
+            <targetReference>AddInitiativeToToScreencampaign</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>CreateActivecampaign</elementReference>
+            </value>
+        </filters>
+        <inputAssignments>
+            <field>Initiative__c</field>
+            <value>
+                <elementReference>CreateInitiative</elementReference>
+            </value>
+        </inputAssignments>
+        <object>Campaign</object>
+    </recordUpdates>
+    <recordUpdates>
+        <name>AddInitiativeToInactivecampaign</name>
+        <label>AddInitiativeToInactivecampaign</label>
+        <locationX>176</locationX>
+        <locationY>782</locationY>
+        <connector>
+            <targetReference>SetCampaignIds</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>CreateInactivecampaign</elementReference>
+            </value>
+        </filters>
+        <inputAssignments>
+            <field>Initiative__c</field>
+            <value>
+                <elementReference>CreateInitiative</elementReference>
+            </value>
+        </inputAssignments>
+        <object>Campaign</object>
+    </recordUpdates>
+    <recordUpdates>
+        <name>AddInitiativeToToScreencampaign</name>
+        <label>AddInitiativeToToScree ncampaign</label>
+        <locationX>176</locationX>
+        <locationY>674</locationY>
+        <connector>
+            <targetReference>AddInitiativeToInactivecampaign</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>CreateToScreencampaign</elementReference>
+            </value>
+        </filters>
+        <inputAssignments>
+            <field>Initiative__c</field>
+            <value>
+                <elementReference>CreateInitiative</elementReference>
+            </value>
+        </inputAssignments>
+        <object>Campaign</object>
+    </recordUpdates>
     <start>
         <locationX>50</locationX>
         <locationY>0</locationY>

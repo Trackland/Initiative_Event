@@ -1,1 +1,24 @@
-{"packageDirectories": [{"path": "force-app", "default": true}], "namespace": null, "sourceApiVersion": "55.0"}
+{
+  "packageDirectories": [
+    {
+      "path": "force-app",
+      "default": true,
+      "dependencies": [
+        {
+          "package": "Trackland Google Connect"
+        }
+      ],
+      "package": "Trackland Initiative Event",
+      "versionName": "ver 0.1",
+      "versionNumber": "0.1.0.NEXT",
+      "versionDescription": "Trackland Initiative Event"
+    }
+  ],
+  "namespace": "",
+  "sourceApiVersion": "55.0",
+  "packageAliases": {
+    "Trackland Google Connect": "04tRQ00000009zNYAQ",
+    "Trackland Initiative Event": "0HoRQ00000000Hl0AI",
+    "Trackland Initiative Event@0.1.0-1": "04tRQ00000008nBYAQ"
+  }
+}

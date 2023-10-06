@@ -20,7 +20,7 @@
         <inputParameters>
             <name>newCampaignId</name>
             <value>
-                <elementReference>CampaignId</elementReference>
+                <elementReference>Campaign</elementReference>
             </value>
         </inputParameters>
         <outputParameters>
@@ -35,14 +35,14 @@
         <locationX>176</locationX>
         <locationY>566</locationY>
         <assignmentItems>
-            <assignToReference>CampaignsToReturn</assignToReference>
+            <assignToReference>CampaignstoReturn</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>CampaignGet</elementReference>
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference>CampaignMemberToReturn</assignToReference>
+            <assignToReference>CampaignMembertoReturn</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>CampaignMemberGet</elementReference>
@@ -106,7 +106,7 @@
             <field>Id</field>
             <operator>EqualTo</operator>
             <value>
-                <elementReference>CampaignId</elementReference>
+                <elementReference>Campaign</elementReference>
             </value>
         </filters>
         <getFirstRecordOnly>false</getFirstRecordOnly>
@@ -143,7 +143,7 @@
     </start>
     <status>Active</status>
     <variables>
-        <name>CampaignId</name>
+        <name>Campaign</name>
         <dataType>String</dataType>
         <isCollection>false</isCollection>
         <isInput>true</isInput>
@@ -157,7 +157,7 @@
         <isOutput>false</isOutput>
     </variables>
     <variables>
-        <name>CampaignMemberToReturn</name>
+        <name>CampaignMembertoReturn</name>
         <dataType>SObject</dataType>
         <isCollection>true</isCollection>
         <isInput>false</isInput>
@@ -165,7 +165,7 @@
         <objectType>CampaignMember</objectType>
     </variables>
     <variables>
-        <name>CampaignsToReturn</name>
+        <name>CampaignstoReturn</name>
         <dataType>SObject</dataType>
         <isCollection>true</isCollection>
         <isInput>false</isInput>

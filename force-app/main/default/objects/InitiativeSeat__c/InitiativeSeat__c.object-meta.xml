@@ -143,6 +143,7 @@
     <allowInChatterGroups>false</allowInChatterGroups>
     <compactLayoutAssignment>SYSTEM</compactLayoutAssignment>
     <deploymentStatus>Deployed</deploymentStatus>
+    <deprecated>false</deprecated>
     <enableActivities>false</enableActivities>
     <enableBulkApi>true</enableBulkApi>
     <enableFeeds>false</enableFeeds>
@@ -155,8 +156,9 @@
     <externalSharingModel>ControlledByParent</externalSharingModel>
     <label>Initiative Seat</label>
     <nameField>
+        <displayFormat>IS-{00000}</displayFormat>
         <label>InitiativeSeat Name</label>
-        <type>Text</type>
+        <type>AutoNumber</type>
     </nameField>
     <pluralLabel>Initiative Seats</pluralLabel>
     <searchLayouts></searchLayouts>
