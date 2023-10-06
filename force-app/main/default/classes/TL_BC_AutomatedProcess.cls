@@ -111,7 +111,9 @@ public with sharing class TL_BC_AutomatedProcess {
     InitiativeSeat__c[] iSeatEmails = [SELECT Id, Contact__r.Email FROM InitiativeSeat__c WHERE Initiative_Event__c = :initEvent.Id];
     String[] emails = new List<String>();
     for(InitiativeSeat__c iSeat : iSeatEmails) emails.add(iSeat.Contact__r.Email);
-    TL_BC_ISeat.sendRequest(initEvent.GoogleEventId__c, initEvent.GoogleCalendarId__c, emails);
+    System.debug(initEvent.GoogleCalendarId__c);
+    GoogleCalendar__c gc = [SELECT Id, GoogleToken__c FROM GoogleCalendar__c WHERE GoogleId__c = :initEvent.GoogleCalendarId__c];
+    // TL_BC_ISeat.sendRequest(initEvent.GoogleEventId__c, initEvent.GoogleCalendarId__c, emails, gc.GoogleToken__c);
   }
 
   public static Map<String,Id> getContactHistories(Id[] contactIds, String initId){
@@ -135,6 +137,7 @@ public with sharing class TL_BC_AutomatedProcess {
     Boolean isFirstEvent = init.EventCount__c == 0 || init.EventCount__c == null;
     Boolean notUseMinimums = !init.UseActiveMinimums__c;
     Boolean haveMinimumToContinue = init.ActiveMinimumToContinue__c <= cmList.size();
+    if(init.Email__c == null) throw new TL_BC_AutomatedProcessException('You need to specify an email to schedule new events');
     if(isFirstEvent || notUseMinimums || haveMinimumToContinue) scheduleNewEvent(init);
   }
 

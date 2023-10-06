@@ -7,8 +7,8 @@ public class TL_BC_UpdateISStatus implements Schedulable{
 
   @Future(callout=true)
 	public static void init(){
-    GoogleCalendar__c calendar = [SELECT Id, Name, GoogleId__c FROM GoogleCalendar__c WHERE Default__c = true];
-    TL_BC_IEvent_Actions.updateAttendance(calendar.Id);
+    Google_Token__c[] tokens = [SELECT Id, Access_Token__c, Refresh_Token__c FROM Google_Token__c];
+    System.enqueueJob(new TL_BC_IEvent_Actions.UpdateAtt(tokens));
   }
 
   @InvocableMethod(label='Attendance scheduler' description='Attendance scheduler')
