@@ -23,14 +23,16 @@ public with sharing class TL_BC_ISeat {
     Google_Token__c[] tokens = [SELECT Id, Access_Token__c, Refresh_Token__c FROM Google_Token__c WHERE Id IN :tokenIds];
     Map<String, Google_Token__c> tokenMap = new Map<String, Google_Token__c>();
     for(Google_Token__c token : tokens) tokenMap.put(token.Id, token);
-    for(GoogleCalendar__c calendar : calendars)  tokenMap.put(calendar.GoogleId__c, tokenMap.get(calendar.GoogleToken__c));
+    for(GoogleCalendar__c calendar : calendars)  {
+      tokenMap.put(calendar.GoogleId__c, tokenMap.get(calendar.GoogleToken__c));
+      System.enqueueJob(new TokenManagement(calendar.GoogleToken__c));
+    }
     for(InitiativeEvent__c event : events) {
       Google_Token__c token = tokenMap.get(event.GoogleCalendarId__c);
       String[] contacts = eventContactsMap.get(event.Id);
       String[] emails = new List<String>();
       for(String conId : contacts) emails.add(contactEmailMap.get(conId));
-      System.debug(JSON.serialize(tokenMap));
-      System.debug(token);
+      if(event.GoogleEventId__c == null || event.GoogleCalendarId__c == null) continue;
       System.enqueueJob(new addGuest(event.GoogleEventId__c, event.GoogleCalendarId__c, emails, token));
     }
   }
@@ -53,22 +55,23 @@ public with sharing class TL_BC_ISeat {
 
   }
 
-  // @future(callout=true)
   public static void sendRequest(String eventId, String calendarId, String[] emails, String tokenId){
-    Google_Token__c token = getToken(tokenId);
+    Google_Token__c token = [SELECT Access_Token__c, Refresh_Token__c, Expires_In__c FROM Google_Token__c WHERE Id = :tokenId];
     TL_SeatActions.addGuestToEvent(eventId, calendarId, emails, token);
   }
 
-  // @Future(callout=true)
-  public static Google_Token__c getToken(String tokenId){
-    Google_Token__c token = [SELECT Id, Access_Token__c, Refresh_Token__c, Expires_In__c FROM Google_Token__c WHERE Id = :tokenId];
-    if(token.Expires_In__c < DateTime.now().addSeconds(60)) return refreshToken(tokenId);
-    return token;
-  }
+  public class TokenManagement implements Queueable, Database.AllowsCallouts{
+    String tokenId;
 
-  // @Future(callout=true)
-  public static Google_Token__c refreshToken(String tokenId){
-    Google_Token__c token = [SELECT Id, Access_Token__c, Refresh_Token__c FROM Google_Token__c WHERE Id = :tokenId];
-    return GenericConnectorController.doRefreshTokenStatic(token);
+    public TokenManagement(String tokenId){
+      this.tokenId = tokenId;
+    }
+
+    public void execute(QueueableContext context){
+      Google_Token__c token = [SELECT Id, Access_Token__c, Refresh_Token__c, Expires_In__c FROM Google_Token__c WHERE Id = :this.tokenId];
+      if(token.Expires_In__c > DateTime.now().addSeconds(60)) return;
+      token = GenericConnectorController.doRefreshTokenStatic(token);
+      update token;
+    }
   }
 }

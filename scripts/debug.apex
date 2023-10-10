@@ -3,7 +3,10 @@
 // TL_BC_AutomatedProcess.addInitiativeSeats(initEvent);
 // TL_BC_AutomatedProcess.scheduleNextEvent(init);
 // TL_BC_AutomatedProcess.checkCIH(new List<Ifnitiative__c>{init});
-// GoogleCalendar__c calendar = [SELECT Id, Name, CreatedDate, CreatedById, LastModifiedDate, LastModifiedById, SystemModstamp, Default__c, Description__c, GoogleId__c FROM GoogleCalendar__c WHERE Default__c = true];
-// TL_BC_IEvent_Actions.updateAttendance(calendar.Id);
+String email = '';
+GoogleCalendar__c calendar = [SELECT Id, Default__c, GoogleId__c, GoogleToken__c FROM GoogleCalendar__c WHERE GoogleToken__r.Email__c = :email AND Default__c = true];
+TL_BC_IEvent_Actions.updateAttendance(calendar.Id, calendar.GoogleToken__c);
 
-TL_BC_ScheduledProcess.init('a07Hs0000185KFFIA2'); 
+// TL_BC_ScheduledProcess.init('a07Hs0000185KFFIA2'); 
+// TL_BC_ISeat.sendRequest('95ed91oh9290o1f29aho38dp5c', 'sebastian.godoy@trackland.com', new List<String>{'jsebastiangcolorado@gmail.com'}, 'a02Hs000015YKLhIAO');
+// ya29.a0AfB_byCRBgYffvOeTtzBfRSHG1MBHkNMSnBuUAv_8-ywGWp-HT48bYjb0S3oDTNpWxAib60XM4Pj1uTkZONSj-XPViOuVDOJvoCZQWRTbCp0Lp1PDNiGSUCQtiGdZojYPsa5P-K9ybDxVAzEsBvxnvdE5gmRYjLulJ5taCgYKAegSARMSFQGOcNnCKP0FBfsjEzMfYahh1VfXmA0171

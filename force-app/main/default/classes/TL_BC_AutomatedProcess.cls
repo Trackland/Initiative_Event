@@ -30,10 +30,9 @@ public with sharing class TL_BC_AutomatedProcess {
     for(ContactInitiativeHistory__c cih : cihList) {
       Id initId = initiativeSeatInit.get(cih.Id);
       Initiative__c init = initiativeMap.get(initId);
-      if(cih.SeatSinceAttendance__c >= init.AddThreshhold__c) {
-        cihIds.add(cih.Contact__c);
-        contactInitiative.put(cih.Contact__c, init);
-      }
+      if(cih.SeatSinceAttendance__c < init.AddThreshhold__c) continue;
+      cihIds.add(cih.Contact__c);
+      contactInitiative.put(cih.Contact__c, init);
     }
     CampaignMember[] cmList = [SELECT Id, ContactId, CampaignId FROM CampaignMember WHERE ContactId IN :cihIds AND Id in :activeCampaignIds];
     for(CampaignMember cm: cmList){
@@ -108,12 +107,6 @@ public with sharing class TL_BC_AutomatedProcess {
       newSeats.add(iSeat);
     }
     insert newSeats;
-    InitiativeSeat__c[] iSeatEmails = [SELECT Id, Contact__r.Email FROM InitiativeSeat__c WHERE Initiative_Event__c = :initEvent.Id];
-    String[] emails = new List<String>();
-    for(InitiativeSeat__c iSeat : iSeatEmails) emails.add(iSeat.Contact__r.Email);
-    System.debug(initEvent.GoogleCalendarId__c);
-    GoogleCalendar__c gc = [SELECT Id, GoogleToken__c FROM GoogleCalendar__c WHERE GoogleId__c = :initEvent.GoogleCalendarId__c];
-    // TL_BC_ISeat.sendRequest(initEvent.GoogleEventId__c, initEvent.GoogleCalendarId__c, emails, gc.GoogleToken__c);
   }
 
   public static Map<String,Id> getContactHistories(Id[] contactIds, String initId){

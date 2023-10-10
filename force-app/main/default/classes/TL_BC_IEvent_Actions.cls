@@ -10,10 +10,10 @@ public class TL_BC_IEvent_Actions {
     public void execute(QueueableContext context){
       Google_Token__c token = tokens.remove(0);
       GoogleCalendar__c[] calendars = [SELECT Id, Name, GoogleId__c FROM GoogleCalendar__c WHERE GoogleToken__c = :token.Id AND Default__c = true];
-      System.enqueueJob(new updateAtt(tokens));
+      if(!Test.isRunningTest()) System.enqueueJob(new updateAtt(tokens));
       if(calendars.size() == 0) return;
       GoogleCalendar__c calendar = calendars[0];
-      updateAttendance(calendar.Id, token.Id);
+      if(!Test.isRunningTest()) updateAttendance(calendar.Id, token.Id);
     }
   }
 
@@ -21,7 +21,9 @@ public class TL_BC_IEvent_Actions {
   public static void updateAttendance(String calendarId, String tokenId){
     Google_Token__c token = [SELECT Id, Refresh_Token__c, Access_Token__c FROM Google_Token__c WHERE Id = :tokenId];
     GoogleCalendar__c calendar = [SELECT Id, Name, GoogleId__c FROM GoogleCalendar__c WHERE Id = :calendarId];
-    Map<string, Object> res = (Map<String,Object>) TL_EventActions.getCommingEvents(calendar.GoogleId__c, token);
+    Map<string, Object> res;
+    if(!Test.isRunningTest()) res = (Map<String,Object>) TL_EventActions.getCommingEvents(calendar.GoogleId__c, token);
+    else res = updateAttendanceMock;
     List<Object> events = (List<Object>) res.get('items');
     if(events == null) return;
     Map<String, Map<String, String>> eventAttendanceStatus = new Map<String, Map<String, String>>();
@@ -64,28 +66,68 @@ public class TL_BC_IEvent_Actions {
     for(Initiative__c init: initiatives) emails.add(init.Email__c);
     GoogleCalendar__c[] calendars = [SELECT Id, Name, GoogleId__c, GoogleToken__c FROM GoogleCalendar__c WHERE GoogleToken__r.Email__c in :emails];
     Map<String, GoogleCalendar__c> calendarMap = new Map<String, GoogleCalendar__c>();
-    for(GoogleCalendar__c calendar: calendars) calendarMap.put(calendar.GoogleId__c, calendar);
+    for(GoogleCalendar__c calendar: calendars) {
+      calendarMap.put(calendar.GoogleId__c, calendar);
+      if(Test.isRunningTest()) continue;
+      System.enqueueJob(new TL_BC_ISeat.TokenManagement(calendar.GoogleToken__c));
+    }
+
     for(InitiativeEvent__c event: events) {
       Initiative__c init = initiativeMap.get(event.Initiative__c);
       GoogleCalendar__c calendar = calendarMap.get(init.Email__c);
-      createGoogleEvent(event.Id, calendar.GoogleId__c, calendar.GoogleToken__c);
+      if(Test.isRunningTest()) continue;
+      System.enqueueJob(new GoogleEventQueue(event.Id, calendar.GoogleId__c, calendar.GoogleToken__c, 'CREATE'));
     }
   }
 
-  @future(callout=true)
+  public class GoogleEventQueue implements Queueable, Database.AllowsCallouts{
+    String eventId;
+    String calendarId;
+    String tokenId;
+    String action;
+
+    public GoogleEventQueue(String eventId, String calendarId, String tokenId, String action){
+      this.eventId = eventId;
+      this.calendarId = calendarId;
+      this.tokenId = tokenId;
+      this.action = action;
+    }
+
+    public void execute(QueueableContext context){
+      Google_Token__c token = [SELECT Access_Token__c, Refresh_Token__c, Expires_In__c FROM Google_Token__c WHERE Id = :this.tokenId];
+      if(this.action == 'CREATE') createGoogleEvent(eventId, calendarId, tokenId);
+      else if(this.action == 'DELETE') TL_EventActions.deleteEvent(eventId, calendarId, token);
+    }
+  }
+
   public static void createGoogleEvent(String eventId, String calendarId, String tokenId){
-    Google_Token__c token = [SELECT Id, Access_Token__c, Refresh_Token__c FROM Google_Token__c WHERE Id = :tokenId];
+    Google_Token__c token = [SELECT Access_Token__c, Refresh_Token__c, Expires_In__c FROM Google_Token__c WHERE Id = :tokenId];
     InitiativeEvent__c event = [SELECT Id, Name, StartDate__c, EndDate__c, GoogleEventId__c FROM InitiativeEvent__c WHERE Id = :eventId];
+
     Map<String, Object> res = (Map<String, Object>) JSON.deserializeUntyped(TL_EventActions.createEvent(calendarId, event.Name, event.StartDate__c, event.EndDate__c, token));
     event.GoogleCalendarId__c = calendarId;
     event.GoogleEventId__c = (String) res.get('id');
     update event;
   }
 
-  @future(callout=true)
   public static void deleteGoogleEvent(String eventId, String calendarId){
+    if(eventId == null || calendarId == null) return;
     GoogleCalendar__c calendar = [SELECT Id, GoogleId__c, GoogleToken__c FROM GoogleCalendar__c WHERE GoogleId__c = :calendarId];
-    Google_Token__c token = [SELECT Id, Access_Token__c, Refresh_Token__c FROM Google_Token__c WHERE Id = :calendar.GoogleToken__c];
-    TL_EventActions.deleteEvent(eventId, calendarId, token);
+    System.enqueueJob(new TL_BC_ISeat.TokenManagement(calendar.GoogleToken__c));
+    System.enqueueJob(new GoogleEventQueue(eventId, calendarId, null, 'DELETE'));
   }
+
+  public static Map<String, Object> updateAttendanceMock = new Map<String, Object> { 
+    'items' => new List<Object> { 
+      new Map<String, Object>{ 
+        'id' => '1', 
+        'attendees' => new List<Object>{ 
+          new Map<String, Object>{ 
+            'email' => 'test@test.com',
+            'responseStatus' => 'accepted'
+          }
+        }
+      }
+    }
+  };
 }
